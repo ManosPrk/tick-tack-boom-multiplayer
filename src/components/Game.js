@@ -7,9 +7,10 @@ import LoserModal from './common/LoserModal';
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
-import { getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, isInstanceValid, startGame, getSocketId, changePlayer, passBomb, gameEnded, gameStarted } from '../socket_helper/playerSocket';
+import { getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, isInstanceValid, startGame, getSocketId, changePlayer, passBomb, gameEnded, gameStarted, addPlayerToGame } from '../socket_helper/playerSocket';
 import { useEffect } from 'react';
 import { useRef } from 'react';
+import ModalTemplate from './common/ModalTemplate';
 
 function Game(props) {
     const [cardsLeft, setCardsLeft] = useState();
@@ -175,9 +176,22 @@ function Game(props) {
         //     }, randomExplodingTime * 1000);
         // })
     }
+    //     <div id="waiting-players-container">
+    //     <h4 id="waiting-player-header">Waiting for {2 - players.length} more player(s) to join</h4>
+    // </div>
 
     return (
         <div className="game-container">
+
+            <ModalTemplate
+                show={true}
+                title={`Waiting for ${2 - players.length} more player(s) to join`}
+                body={
+                    <div className="loader-container text-center">
+                        <i style={{ fontSize: "70px" }} className="fa fa-spinner fa-spin"></i>
+                    </div>
+                }
+            />
             <NavLink to="/">Menu</NavLink>
             <LoserModal show={showLoserModal} close={hideLoserModal} players={[...players]}></LoserModal>
             {/* {cards.length === 0 && <ResultsModal show={showResultsModal} close={hideResultsModal} players={[...players]} />} */}
