@@ -44,6 +44,19 @@ a:hover{
     justify-content: space-evenly;
 }
 
+.game-modal{
+
+}
+
+.game-modal-header{
+    background: #ff6242;
+    color: aliceblue;
+}
+
+.game-modal-body{
+    background: #a0bcbd;
+}
+
 .syllable-card{
     display: flex;
     flex-flow: column;
