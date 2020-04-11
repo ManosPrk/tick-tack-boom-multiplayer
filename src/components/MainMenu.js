@@ -8,6 +8,7 @@ function MainMenu(props) {
 
     const newGameInputValues = {
         name: '',
+        gameId: ''
     };
 
     const joinGameInputs = {
@@ -36,9 +37,9 @@ function MainMenu(props) {
             return;
         }
 
-        addPlayerToGame(joinGameInputs).then((response) => {
-            if (response.errorMessage) {
-                toast.error(response.errorMessage)
+        addPlayerToGame(joinGameInputs).then((ioResponse) => {
+            if (ioResponse.errorMessage) {
+                toast.error(ioResponse.errorMessage)
             } else {
                 props.history.push(`game/${joinGameInputs.gameId}`);
             }
