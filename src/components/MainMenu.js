@@ -36,9 +36,12 @@ function MainMenu(props) {
             return;
         }
 
-        addPlayerToGame(joinGameInputs).then((message) => {
-            console.log(message);
-            props.history.push(`game/${joinGameInputs.gameId}`);
+        addPlayerToGame(joinGameInputs).then((response) => {
+            if (response.errorMessage) {
+                toast.error(response.errorMessage)
+            } else {
+                props.history.push(`game/${joinGameInputs.gameId}`);
+            }
         });
     }
 
@@ -48,7 +51,7 @@ function MainMenu(props) {
             <div>
                 <nav className="d-flex flex-column col-md-12">
                     <ModalFormTemplate
-                        modalTitle="Enter your name to start a new game!"
+                        modalTitle="Enter your name!"
                         modalButtonText="New Game"
                         formButtonText="Start"
                         formHandleSubmit={handleNewGameSubmit}
@@ -57,7 +60,7 @@ function MainMenu(props) {
                     />
 
                     <ModalFormTemplate
-                        modalTitle="Enter your name and game id to join a game!"
+                        modalTitle="Enter your name and game id!"
                         modalButtonText="Join Game"
                         formButtonText="Join"
                         formHandleSubmit={handleJoinGameSubmit}
