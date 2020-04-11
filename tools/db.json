@@ -1,0 +1,28 @@
+{
+  "Players": [
+    {
+      "id": 1,
+      "name": "koula",
+      "roundsLost": 0,
+      "createdAt": 1585480355063
+    },
+    {
+      "id": 2,
+      "name": "manos",
+      "roundsLost": 0,
+      "createdAt": 1585480355067
+    },
+    {
+      "id": 3,
+      "name": "soula",
+      "roundsLost": 0,
+      "createdAt": 1585480355082
+    },
+    {
+      "id": 4,
+      "name": "yiota",
+      "roundsLost": 0,
+      "createdAt": 1585480355084
+    }
+  ]
+}

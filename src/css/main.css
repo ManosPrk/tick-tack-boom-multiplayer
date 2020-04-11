@@ -1,0 +1,95 @@
+html, body, #main, #main-menu-container{
+    height: 100%;
+    background: #2a2a2a;
+}
+
+a{
+    color: aliceblue;
+}
+
+a:hover{
+    color: aliceblue;
+}
+
+.modal{
+    color: #212529;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Opera and Firefox */
+  }
+
+
+.nav-button{
+    text-decoration: none;
+    color: aliceblue;
+}
+
+.nav-button:hover{
+    text-decoration: none;
+    opacity: 0.7;
+}
+
+.nav-button:focus{
+    text-decoration: none;
+}
+
+.justify-content-evenly{
+    justify-content: space-evenly;
+}
+
+.syllable-card{
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    text-align: center;
+    width: 13rem;
+    font-size: 4rem;
+    color: rgb(42, 42, 42);
+    background: aliceblue;
+    border: solid 4px aliceblue;
+    border-radius: 2px;
+}
+
+.dice{
+    margin: 1rem 0rem 1rem 0rem;
+    width: 5rem;
+    height: 5rem;
+    font-size: 1.5rem;
+    /* color: #656769; */
+    /* background: #ffe500; */
+    border: 1px solid aliceblue;
+    justify-content: center;
+    text-align: center;
+    display: flex;
+    flex-flow: column;
+}
+
+.game-items-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-container{
+    background: rgb(42, 42, 42);
+    /* background: #000080; */
+    color: aliceblue;
+    text-decoration: none;
+    display: flex;
+    flex-flow: column;
+    height: 100vh;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    justify-content: space-between;
+}
+
+#loser-list-group{
+    /* background: yellow; */
+}
