@@ -4,10 +4,10 @@ import { Modal, Button } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 function ModalTemplate(props) {
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(props.show || false);
 
-    const handleOpen = () => setShow(true);
-    const handleClose = () => setShow(false);
+    const handleOpen = () => setShow(props.show || true);
+    const handleClose = () => setShow(props.show || false);
 
     return (
         <>
@@ -21,12 +21,13 @@ function ModalTemplate(props) {
                 show={show}
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
+                className="game-modal"
                 onHide={handleClose}
             >
-                <Modal.Header className='justify-content-center'>
+                <Modal.Header className='game-modal-header justify-content-center'>
                     <Modal.Title>{props.title}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="game-modal-body">
                     {props.body}
                 </Modal.Body>
 

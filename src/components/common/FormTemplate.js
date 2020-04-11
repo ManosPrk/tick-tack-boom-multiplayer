@@ -36,7 +36,7 @@ function FormTemplate(props) {
                         {props.mutedText}
                     </Form.Text>
                 </Form.Group>
-                <Button className="text-decoration-none" variant="primary" type="submit">
+                <Button className="text-decoration-none game-form-button" variant="dark" type="submit">
                     {props.buttonText}
                 </Button>
             </Form>
