@@ -31,7 +31,7 @@
   },
   "scripts": {
     "start": "cross-env react-scripts start REACT_APP_API_URL=https://ttboom-web-api-server.herokuapp.com/",
-    "dev": "cross-env REACT_APP_API_URL=http://localhost:1337 react-scripts start",
+    "dev": "cross-env REACT_APP_API_URL=http://192.168.1.8:1337 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
