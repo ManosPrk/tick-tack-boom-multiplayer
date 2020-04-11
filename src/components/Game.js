@@ -182,22 +182,22 @@ function Game(props) {
 
     return (
         <div className="game-container">
-
-            <ModalTemplate
-                show={true}
-                title={`Waiting for ${2 - players.length} more player(s) to join`}
-                body={
-                    <div className="loader-container text-center">
-                        <i style={{ fontSize: "70px" }} className="fa fa-spinner fa-spin"></i>
-                    </div>
-                }
-            />
+            {players.length < 2 &&
+                <ModalTemplate
+                    show={true}
+                    title={`Waiting for ${2 - players.length} more player(s) to join`}
+                    body={
+                        <div className="loader-container text-center">
+                            <i style={{ fontSize: "70px" }} className="fa fa-spinner fa-spin"></i>
+                        </div>
+                    }
+                />}
             <NavLink to="/">Menu</NavLink>
             <LoserModal show={showLoserModal} close={hideLoserModal} players={[...players]}></LoserModal>
             {/* {cards.length === 0 && <ResultsModal show={showResultsModal} close={hideResultsModal} players={[...players]} />} */}
             {gameOver && <ResultsModal show={showResultsModal} newGame={resetGame} close={hideResultsModal} players={[...players]} />}
             <Bomb onClick={handleBombClick}></Bomb>
-            <span>Remaining syllables: {cardsLeft} </span>
+            <span>Remaining cards: {cardsLeft} </span>
             <audio loop={true} ref={tickAudio} src="/tick.mp3" id="tick-audio"></audio>
             <audio ref={boomAudio} src="/boom.mp3" id="bomb-audio"></audio>
             <div className="game-items-container">
