@@ -11,10 +11,12 @@ import { getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, g
 import { useEffect } from 'react';
 import { useRef } from 'react';
 import ModalTemplate from './common/ModalTemplate';
+import { useCookies, Cookies } from 'react-cookie';
 
 function Game(props) {
     const [cardsLeft, setCardsLeft] = useState();
     const gameId = props.match.params.id;
+    const test = Cookies;
     const yourPlayerId = getSocketId();
     const [currentCard, setCurrentCard] = useState('DRAW');
     const [currentDiceSide, setCurrentDiceSide] = useState('ROLL');
@@ -27,11 +29,12 @@ function Game(props) {
     const tickAudio = useRef();
     const boomAudio = useRef();
     const [players, setPlayers] = useState([]);
+    const standings = () => players.sort((player1, player2) => player1.roundLost > player2.roundsLost);
 
     useEffect(() => {
         let mounted = true;
         if (mounted) {
-
+            console.log(test);
             isInstanceValid(gameId, (isValid) => {
                 if (!isValid) {
                     props.history.push('/');
@@ -81,6 +84,8 @@ function Game(props) {
                 }
                 boomAudio.current.play();
                 toast.info(loserMessage);
+                setShowLoserModal(true);
+                resetState();
             })
 
         }
@@ -139,7 +144,6 @@ function Game(props) {
 
     function hideLoserModal(event) {
         event.preventDefault();
-        players[event.target.value].roundsLost++;
         setShowLoserModal(false);
         if (cardsLeft === 0) {
             setShowResultsModal(true);
@@ -193,7 +197,13 @@ function Game(props) {
                     }
                 />}
             <NavLink to="/">Menu</NavLink>
-            <LoserModal show={showLoserModal} close={hideLoserModal} players={[...players]}></LoserModal>
+            {/* <LoserModal show={showLoserModal} close={hideLoserModal} players={[...players]}></LoserModal> */}
+            <ModalTemplate
+                show={showLoserModal}
+                title={
+                    `${standings()[0]}`
+                }
+            />
             {/* {cards.length === 0 && <ResultsModal show={showResultsModal} close={hideResultsModal} players={[...players]} />} */}
             {gameOver && <ResultsModal show={showResultsModal} newGame={resetGame} close={hideResultsModal} players={[...players]} />}
             <Bomb onClick={handleBombClick}></Bomb>

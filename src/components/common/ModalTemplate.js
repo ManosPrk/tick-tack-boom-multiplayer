@@ -4,10 +4,11 @@ import { Modal, Button } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 function ModalTemplate(props) {
+
     const [show, setShow] = useState(props.show || false);
 
-    const handleOpen = () => setShow(props.show || true);
-    const handleClose = () => setShow(props.show || false);
+    const handleOpen = () => setShow(props.open || true);
+    const handleClose = () => setShow(props.close || false);
 
     return (
         <>

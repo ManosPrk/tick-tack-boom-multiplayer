@@ -3,9 +3,10 @@ import Bomb from "./Bomb";
 import { createGameInstance, addPlayerToGame } from "../socket_helper/playerSocket";
 import ModalFormTemplate from "./common/ModalFormTemplate";
 import { toast } from "react-toastify";
+import { useCookies } from "react-cookie";
 
 function MainMenu(props) {
-
+    const [cookies, setCookie, removeCookie] = useCookies(['player']);
     const newGameInputValues = {
         name: '',
         gameId: ''
@@ -20,6 +21,7 @@ function MainMenu(props) {
         event.preventDefault();
         createGameInstance(newGameInputValues, (ioResponse) => {
             console.log(ioResponse.errorMessage);
+            setCookie('name', newGameInputValues);
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage);
             } else {
