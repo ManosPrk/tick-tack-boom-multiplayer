@@ -1,14 +1,23 @@
 import io from 'socket.io-client';
-const socket = io.connect("https://ttboom-web-api-server.herokuapp.com/");
+const socket = io.connect("localhost:1337/");
 
-export function getSocketId() {
-    return socket.id;
+export function addClientToGameRoom(clientId) {
+    socket.emit('addClientToGameRoom', clientId, (response) => {
+        console.log(response.message, response.errorMessage);
+    })
 }
 
 export function createGameInstance(data, cb) {
     socket.emit('createGameInstance', data, (res) => {
-        console.log(res);
         return cb(res);
+    });
+}
+
+export function addPlayerToGame(data) {
+    return new Promise((resolve) => {
+        socket.emit('subcribeToGameInstanceNewPlayer', data, (response) => {
+            resolve(response);
+        });
     });
 }
 
@@ -25,14 +34,7 @@ export function updatePlayers(cb) {
     });
 }
 
-export function addPlayerToGame(data) {
-    return new Promise((resolve) => {
-        socket.emit('subcribeToGameInstanceNewPlayer', data, (response) => {
-            console.log(response);
-            resolve(response);
-        });
-    });
-}
+
 
 export function getPlayersByGameId(gameId) {
     return new Promise((resolve) => {
@@ -67,14 +69,14 @@ export function updateCurrentCard(cb) {
     })
 }
 
-export function startGame(gameId, yourPlayerId, cb) {
-    socket.emit('start-game', gameId, yourPlayerId, (message) => {
+export function startGame(yourPlayerId, cb) {
+    socket.emit('start-game', yourPlayerId, (message) => {
         cb(message);
     });
 }
 
-export function passBomb(gameId, playerId) {
-    socket.emit('pass-bomb', gameId, playerId);
+export function passBomb(playerId, cb) {
+    socket.emit('pass-bomb', playerId, (message) => cb(message));
 }
 
 export function changePlayer(cb) {
@@ -89,4 +91,12 @@ export function gameEnded(cb) {
 
 export function gameStarted(cb) {
     socket.on('game-started', (message) => cb(message));
+}
+
+export function getInstances() {
+    return new Promise((resolve) => {
+        socket.emit('getInstances', (response) => {
+            resolve(response);
+        });
+    });
 }

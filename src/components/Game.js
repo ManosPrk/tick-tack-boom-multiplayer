@@ -2,22 +2,24 @@ import React, { useState } from 'react';
 import Bomb from "./Bomb";
 import Dice from "./Dice";
 import Card from "./Card";
-import { getRandomSecs } from "../Utilities"
-import LoserModal from './common/LoserModal';
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
-import { getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, isInstanceValid, startGame, getSocketId, changePlayer, passBomb, gameEnded, gameStarted, addPlayerToGame } from '../socket_helper/playerSocket';
+import { getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, isInstanceValid, startGame, addClientToGameRoom, changePlayer, passBomb, gameEnded, gameStarted } from '../socket_helper/playerSocket';
 import { useEffect } from 'react';
 import { useRef } from 'react';
 import ModalTemplate from './common/ModalTemplate';
-import { useCookies, Cookies } from 'react-cookie';
+import { useCookies } from 'react-cookie';
+import ItemList from './common/ItemList';
 
 function Game(props) {
     const [cardsLeft, setCardsLeft] = useState();
+    //TO-DO
     const gameId = props.match.params.id;
-    const test = Cookies;
-    const yourPlayerId = getSocketId();
+    // eslint-disable-next-line no-unused-vars
+    const [cookies, setCookie, removeCookie] = useCookies(['player']);
+    // eslint-disable-next-line no-unused-vars
+    const [clientId, setClientId] = useState(cookies.clientId);
     const [currentCard, setCurrentCard] = useState('DRAW');
     const [currentDiceSide, setCurrentDiceSide] = useState('ROLL');
     const [isDiceRolled, setIsDiceRolled] = useState(false);
@@ -29,17 +31,19 @@ function Game(props) {
     const tickAudio = useRef();
     const boomAudio = useRef();
     const [players, setPlayers] = useState([]);
-    const standings = () => players.sort((player1, player2) => player1.roundLost > player2.roundsLost);
+    const [roundLoser, setRoundLoser] = useState();
+    // const standings = players.sort((player1, player2) => player1.roundLost > player2.roundsLost);
 
     useEffect(() => {
         let mounted = true;
         if (mounted) {
-            console.log(test);
             isInstanceValid(gameId, (isValid) => {
                 if (!isValid) {
                     props.history.push('/');
                 }
             });
+
+            addClientToGameRoom(clientId);
 
             updateCurrentCard((response) => {
                 if (response.errorMessage) {
@@ -68,6 +72,7 @@ function Game(props) {
             });
 
             changePlayer((message) => {
+                console.log(message);
                 toast.warn(message);
                 tickAudio.current.play();
             });
@@ -77,13 +82,14 @@ function Game(props) {
                 setRoundStarted(true);
             });
 
-            gameEnded((loserMessage) => {
-                // const loser = players.find((player) => player.id === loser.id);
-                if (!tickAudio.current.paused) {
+            gameEnded((loserName) => {
+                if (tickAudio.current && !tickAudio.current.paused) {
                     tickAudio.current.pause();
                 }
                 boomAudio.current.play();
-                toast.info(loserMessage);
+                const loser = players.find((player) => player.name === loserName);
+                loser.roundsLost++;
+                setRoundLoser(loser);
                 setShowLoserModal(true);
                 resetState();
             })
@@ -97,13 +103,14 @@ function Game(props) {
             toast.error('You already drew a card')
             return;
         }
-        getCurrentCard(gameId, (response) => {
+        getCurrentCard(clientId, (response) => {
             if (response.errorMessage) {
-                console.log(response.errorMessage);
+                toast.error(response.errorMessage);
+            } else {
+                setCurrentCard(response.card);
+                setIsCardDrawn(true);
+                setCardsLeft(response.cardsLeft);
             }
-            setCurrentCard(response.card);
-            setIsCardDrawn(true);
-            setCardsLeft(response.cardsLeft);
         })
     }
 
@@ -112,33 +119,30 @@ function Game(props) {
             toast.error('You have already rolled the dice')
             return;
         }
-        getSocketDiceSide(gameId, (response) => {
+        getSocketDiceSide(clientId, (response) => {
             if (response.errorMessage) {
-                console.log(response.errorMessage);
+                toast.error(response.errorMessage);
+            } else {
+                setIsDiceRolled(true);
+                setCurrentDiceSide(response.side);
             }
-            setIsDiceRolled(true);
-            setCurrentDiceSide(response.side);
         });
     }
 
 
     function handleBombClick() {
-        // const cardError = `${!isCardDrawn ? `draw a card` : ''}`;
-        // const diceError = `${!isDiceRolled ? 'roll the dice' : ''}`;
-        // // if (!isDiceRolled || !isCardDrawn) {
-        // //     toast.error(`Please ${diceError}${!isDiceRolled && !isCardDrawn ? ' and ' : ''}${cardError}.`)
-        // //     return;
-        // // }
-        // if (roundStarted) {
-        //     return;
-        // }
-        const player = players.find((player) => player.id === yourPlayerId);
-        if (player.isLeader && !roundStarted) {
+        if (!roundStarted) {
             startTimer();
         }
         else if (roundStarted) {
-            tickAudio.current.pause();
-            passBomb(gameId, yourPlayerId);
+            passBomb(clientId, (response) => {
+                console.log(response)
+                if (response.errorMessage) {
+                    toast.error(response.errorMessage);
+                } else {
+                    tickAudio.current.pause();
+                }
+            });
         }
     }
 
@@ -164,31 +168,30 @@ function Game(props) {
 
     function resetGame() {
         setGameover(false);
+        setRoundLoser(null);
         //TODO: RESET CARDS
         players.forEach((player) => { player.roundsLost = 0 });
     }
 
     function startTimer() {
         setRoundStarted(true);
-        tickAudio.current.play().then(() => startGame(gameId, yourPlayerId, (message) => toast.info(message)));
-        // tickAudio.play().then(() => {
-        //     setTimeout(() => {
-        //         tickAudio.pause();
-        //         boomAudio.play();
-        //         setShowLoserModal(true);
-        //         resetState();
-        //     }, randomExplodingTime * 1000);
-        // })
+        startGame(clientId, (response) => {
+            if (response.errorMessage) {
+                toast.error(response.errorMessage);
+            } else {
+                toast.info(response.message)
+                tickAudio.current.play();
+            }
+        })
+
     }
-    //     <div id="waiting-players-container">
-    //     <h4 id="waiting-player-header">Waiting for {2 - players.length} more player(s) to join</h4>
-    // </div>
 
     return (
         <div className="game-container">
             {players.length < 2 &&
                 <ModalTemplate
                     show={true}
+                    noClose={true}
                     title={`Waiting for ${2 - players.length} more player(s) to join`}
                     body={
                         <div className="loader-container text-center">
@@ -197,14 +200,19 @@ function Game(props) {
                     }
                 />}
             <NavLink to="/">Menu</NavLink>
-            {/* <LoserModal show={showLoserModal} close={hideLoserModal} players={[...players]}></LoserModal> */}
-            <ModalTemplate
-                show={showLoserModal}
-                title={
-                    `${standings()[0]}`
-                }
-            />
-            {/* {cards.length === 0 && <ResultsModal show={showResultsModal} close={hideResultsModal} players={[...players]} />} */}
+            {showLoserModal &&
+                <ModalTemplate
+                    show={true}
+                    title={`${roundLoser.name} lost this round!`}
+                    body={
+                        <ItemList
+                            items={players
+                                .map((player) => {
+                                    return `${player.name}  ${player.roundsLost}`;
+                                })}
+                        />
+                    }
+                />}
             {gameOver && <ResultsModal show={showResultsModal} newGame={resetGame} close={hideResultsModal} players={[...players]} />}
             <Bomb onClick={handleBombClick}></Bomb>
             <span>Remaining cards: {cardsLeft} </span>
