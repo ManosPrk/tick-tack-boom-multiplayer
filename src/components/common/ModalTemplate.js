@@ -8,7 +8,7 @@ function ModalTemplate(props) {
     const [show, setShow] = useState(props.show || false);
 
     const handleOpen = () => setShow(props.open || true);
-    const handleClose = () => setShow(props.close || false);
+    const handleClose = () => setShow(props.noClose || false);
 
     return (
         <>
