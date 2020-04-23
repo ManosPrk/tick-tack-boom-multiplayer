@@ -2,7 +2,6 @@ import React from 'react';
 import { getInstances } from '../socket_helper/playerSocket';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import ModalTemplate from './common/ModalTemplate';
 import ItemList from './common/ItemList';
 
 function InstancesModals(props) {
@@ -23,11 +22,17 @@ function InstancesModals(props) {
                         `${game.players.map((player, index) => `Player: ${player.name} id:${player.id}, index of array: ${index}`)}`
                     ]
                 )
-                // const gamesArray = _games.map((game) =>
-                //     `id: ${game.id}\n cards: ${game.cards.length}\n playerWithBomb: ${game.playerWithBomb.id}, ${game.playerWithBomb.name}\n ${game.players.map((player, index) => `${player.id}, ${player.name}, index: ${index}`)}`
-                // )
-                console.log(gamesArray);
+
+                const playersArray = _players.map((player) =>
+                    [
+                        `id: ${player.id}`,
+                        `cards: ${player.cards.length}`,
+                        `playerWithBomb: ${player.playerWithBomb.id}, ${player.playerWithBomb.name}`,
+                        `${player.players.map((player, index) => `Player: ${player.name} id:${player.id}, index of array: ${index}`)}`
+                    ]
+                )
                 setGames(gamesArray);
+                setPlayers(playersArray);
             })
         }
         return () => mounted = false;
@@ -42,6 +47,17 @@ function InstancesModals(props) {
                         <div style={{ border: '1px solid' }}>
                             <ItemList
                                 items={game}
+                            />
+                        </div>
+                    )
+                })
+            }
+            {players.length > 0 &&
+                players.map((player) => {
+                    return (
+                        <div style={{ border: '1px solid' }}>
+                            <ItemList
+                                items={player}
                             />
                         </div>
                     )
