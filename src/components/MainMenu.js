@@ -4,8 +4,10 @@ import { createGameInstance, addPlayerToGame } from "../socket_helper/playerSock
 import ModalFormTemplate from "./common/ModalFormTemplate";
 import { toast } from "react-toastify";
 import { useCookies } from "react-cookie";
+import { useEffect } from "react";
 
 function MainMenu(props) {
+    // eslint-disable-next-line no-unused-vars
     const [cookies, setCookie, removeCookie] = useCookies(['player']);
     const newGameInputValues = {
         name: '',
@@ -17,14 +19,18 @@ function MainMenu(props) {
         gameId: ''
     };
 
+    useEffect(() => {
+        removeCookie('clientId');
+    })
+
     function handleNewGameSubmit(event) {
         event.preventDefault();
         createGameInstance(newGameInputValues, (ioResponse) => {
             console.log(ioResponse.errorMessage);
-            setCookie('name', newGameInputValues);
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage);
             } else {
+                setCookie('clientId', ioResponse.clientId);
                 props.history.push(`/game/${ioResponse.gameId}`);
             }
         });
@@ -33,9 +39,7 @@ function MainMenu(props) {
     function handleJoinGameSubmit(event) {
         event.preventDefault();
         const form = event.target;
-        console.log(form.checkValidity());
         if (form.checkValidity() === false) {
-            event.stopPropagation();
             return;
         }
 
@@ -43,6 +47,7 @@ function MainMenu(props) {
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage)
             } else {
+                setCookie('clientId', ioResponse.clientId);
                 props.history.push(`game/${joinGameInputs.gameId}`);
             }
         });
@@ -70,9 +75,6 @@ function MainMenu(props) {
                         // formInputHandleBlur={handleBlur}
                         formInputValues={joinGameInputs}
                     />
-                    <h1>
-
-                    </h1>
                 </nav>
             </div >
         </div >
