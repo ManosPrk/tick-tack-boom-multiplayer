@@ -6,7 +6,6 @@ import "react-toastify/dist/ReactToastify.css";
 import MainMenu from './MainMenu';
 import Game from './Game';
 import { ToastContainer } from 'react-toastify';
-import TextInput from './common/TextInput';
 import { CookiesProvider } from 'react-cookie';
 import InstancesModals from './InstancesModal';
 
