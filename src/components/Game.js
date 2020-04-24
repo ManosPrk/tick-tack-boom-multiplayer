@@ -37,13 +37,20 @@ function Game(props) {
     useEffect(() => {
         let mounted = true;
         if (mounted) {
-            isInstanceValid(gameId, (isValid) => {
-                if (!isValid) {
+            isInstanceValid(clientId, (isValid) => {
+                if (isValid.errorMessage) {
+                    console.log(isValid.errorMessage);
+                } else if (!isValid) {
                     props.history.push('/');
                 }
             });
 
-            addClientToGameRoom(clientId);
+            addClientToGameRoom(clientId, (response) => {
+                if (response.errorMessage) {
+                    console.log(response.errorMessage);
+                    props.history.push('/');
+                }
+            });
 
             updateCurrentCard((response) => {
                 if (response.errorMessage) {
@@ -67,7 +74,7 @@ function Game(props) {
                 setPlayers(_players);
             })
 
-            getPlayersByGameId(gameId).then((_players) => {
+            getPlayersByGameId(gameId, (_players) => {
                 setPlayers(_players);
             });
 
@@ -82,13 +89,11 @@ function Game(props) {
                 setRoundStarted(true);
             });
 
-            gameEnded((loserName) => {
+            gameEnded((loser) => {
                 if (tickAudio.current && !tickAudio.current.paused) {
                     tickAudio.current.pause();
                 }
                 boomAudio.current.play();
-                const loser = players.find((player) => player.name === loserName);
-                loser.roundsLost++;
                 setRoundLoser(loser);
                 setShowLoserModal(true);
                 resetState();
@@ -96,7 +101,7 @@ function Game(props) {
 
         }
         return () => mounted = false;
-    }, [gameId])
+    }, [gameId, clientId])
 
     function handleCardClick() {
         if (isCardDrawn) {
@@ -146,8 +151,7 @@ function Game(props) {
         }
     }
 
-    function hideLoserModal(event) {
-        event.preventDefault();
+    function hideLoserModal() {
         setShowLoserModal(false);
         if (cardsLeft === 0) {
             setShowResultsModal(true);
@@ -204,6 +208,7 @@ function Game(props) {
                 <ModalTemplate
                     show={true}
                     title={`${roundLoser.name} lost this round!`}
+                    noClose={hideLoserModal}
                     body={
                         <ItemList
                             items={players
