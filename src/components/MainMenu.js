@@ -19,10 +19,6 @@ function MainMenu(props) {
         gameId: ''
     };
 
-    useEffect(() => {
-        removeCookie('clientId');
-    })
-
     function handleNewGameSubmit(event) {
         event.preventDefault();
         createGameInstance(newGameInputValues, (ioResponse) => {
