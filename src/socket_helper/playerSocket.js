@@ -1,9 +1,9 @@
 import io from 'socket.io-client';
 const socket = io.connect("localhost:1337/");
 
-export function addClientToGameRoom(clientId) {
+export function addClientToGameRoom(clientId, cb) {
     socket.emit('addClientToGameRoom', clientId, (response) => {
-        console.log(response.message, response.errorMessage);
+        cb(response);
     })
 }
 
@@ -36,11 +36,9 @@ export function updatePlayers(cb) {
 
 
 
-export function getPlayersByGameId(gameId) {
-    return new Promise((resolve) => {
-        socket.emit('requestPlayersFromGame', gameId, (response) => {
-            resolve(response);
-        });
+export function getPlayersByGameId(gameId, cb) {
+    socket.emit('requestPlayersFromGame', gameId, (response) => {
+        cb(response);
     });
 }
 
@@ -84,8 +82,9 @@ export function changePlayer(cb) {
 }
 
 export function gameEnded(cb) {
-    socket.on('game-ended', (loserId) => {
-        cb(loserId);
+    socket.on('game-ended', (loserName) => {
+        console.log(loserName)
+        cb(loserName);
     })
 }
 
