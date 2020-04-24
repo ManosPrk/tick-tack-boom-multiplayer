@@ -34,6 +34,11 @@ function Game(props) {
     const [roundLoser, setRoundLoser] = useState();
     // const standings = players.sort((player1, player2) => player1.roundLost > player2.roundsLost);
 
+    ///TODO///
+    //Get dice side, card and cardsLeft on refresh
+    //Get players on round end
+    ///
+
     useEffect(() => {
         let mounted = true;
         if (mounted) {
@@ -43,6 +48,10 @@ function Game(props) {
                 } else if (!isValid) {
                     props.history.push('/');
                 }
+            });
+
+            getPlayersByGameId(gameId, (_players) => {
+                setPlayers(_players);
             });
 
             addClientToGameRoom(clientId, (response) => {
@@ -73,10 +82,6 @@ function Game(props) {
                 toast.success(message);
                 setPlayers(_players);
             })
-
-            getPlayersByGameId(gameId, (_players) => {
-                setPlayers(_players);
-            });
 
             changePlayer((message) => {
                 console.log(message);
@@ -204,9 +209,10 @@ function Game(props) {
                     }
                 />}
             <NavLink to="/">Menu</NavLink>
-            {showLoserModal &&
+            {
+                showLoserModal &&
                 <ModalTemplate
-                    show={true}
+                    show={showLoserModal}
                     title={`${roundLoser.name} lost this round!`}
                     noClose={hideLoserModal}
                     body={
@@ -217,7 +223,9 @@ function Game(props) {
                                 })}
                         />
                     }
-                />}
+                />
+            }
+
             {gameOver && <ResultsModal show={showResultsModal} newGame={resetGame} close={hideResultsModal} players={[...players]} />}
             <Bomb onClick={handleBombClick}></Bomb>
             <span>Remaining cards: {cardsLeft} </span>
