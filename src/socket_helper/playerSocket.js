@@ -1,5 +1,9 @@
 import io from 'socket.io-client';
-const socket = io.connect("localhost:1337/");
+let socket;
+
+export function removeListener(socketName) {
+    socket.off(socketName);
+}
 
 export function addClientToGameRoom(clientId, cb) {
     socket.emit('addClientToGameRoom', clientId, (response) => {
@@ -15,7 +19,7 @@ export function createGameInstance(data, cb) {
 
 export function addPlayerToGame(data) {
     return new Promise((resolve) => {
-        socket.emit('subcribeToGameInstanceNewPlayer', data, (response) => {
+        socket.emit('join-game-instance', data, (response) => {
             resolve(response);
         });
     });
@@ -82,9 +86,9 @@ export function changePlayer(cb) {
 }
 
 export function gameEnded(cb) {
-    socket.on('game-ended', (loserName) => {
-        console.log(loserName)
-        cb(loserName);
+    socket.on('game-ended', (response) => {
+        console.log(response)
+        cb(response);
     })
 }
 
@@ -98,4 +102,18 @@ export function getInstances() {
             resolve(response);
         });
     });
+}
+
+export function onDisconnect(cb) {
+    socket.on('disconnect', (response) => {
+        cb(response)
+    });
+}
+
+export function openSocket() {
+    socket = io.connect("localhost:1337/");
+}
+
+export function closeSocket() {
+    socket.close();
 }
