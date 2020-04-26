@@ -27,7 +27,7 @@ function MainMenu(props) {
 
     function handleNewGameSubmit(event) {
         event.preventDefault();
-        createGameInstance(newGameInputValues, (ioResponse) => {
+        createGameInstance({ ...newGameInputValues, clientId: cookies.clientId }, (ioResponse) => {
             console.log(ioResponse.errorMessage);
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage);
@@ -44,12 +44,13 @@ function MainMenu(props) {
         if (form.checkValidity() === false) {
             return;
         }
-
-        addPlayerToGame(joinGameInputs).then((ioResponse) => {
+        addPlayerToGame({ ...joinGameInputs, clientId: cookies.clientId }).then((ioResponse) => {
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage)
             } else {
+                if (!ioResponse.rejoinMessage) {
                     setCookie('clientId', ioResponse.clientId);
+                }
                 props.history.push(`game/${joinGameInputs.gameId}`);
             }
         });
