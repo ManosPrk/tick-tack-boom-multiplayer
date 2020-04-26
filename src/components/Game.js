@@ -5,7 +5,7 @@ import Card from "./Card";
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
-import { getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, isInstanceValid, startGame, addClientToGameRoom, changePlayer, passBomb, gameEnded, gameStarted } from '../socket_helper/playerSocket';
+import { closeSocket, getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, isInstanceValid, startGame, addClientToGameRoom, changePlayer, passBomb, gameEnded, gameStarted, removeListener, openSocket, onDisconnect } from '../socket_helper/playerSocket';
 import { useEffect } from 'react';
 import { useRef } from 'react';
 import ModalTemplate from './common/ModalTemplate';
@@ -22,8 +22,6 @@ function Game(props) {
     const [clientId, setClientId] = useState(cookies.clientId);
     const [currentCard, setCurrentCard] = useState('DRAW');
     const [currentDiceSide, setCurrentDiceSide] = useState('ROLL');
-    const [isDiceRolled, setIsDiceRolled] = useState(false);
-    const [isCardDrawn, setIsCardDrawn] = useState(false);
     const [roundStarted, setRoundStarted] = useState(false);
     const [showLoserModal, setShowLoserModal] = useState(false);
     const [showResultsModal, setShowResultsModal] = useState(false);
@@ -35,105 +33,112 @@ function Game(props) {
     // const standings = players.sort((player1, player2) => player1.roundLost > player2.roundsLost);
 
     ///TODO///
-    //Get dice side, card and cardsLeft on refresh
-    //Get players on round end
+    //fix menu changing position on show modals
     ///
 
     useEffect(() => {
-        let mounted = true;
-        if (mounted) {
-            isInstanceValid(clientId, (isValid) => {
-                if (isValid.errorMessage) {
-                    console.log(isValid.errorMessage);
-                } else if (!isValid) {
-                    props.history.push('/');
-                }
-            });
+        openSocket();
 
-            getPlayersByGameId(gameId, (_players) => {
-                setPlayers(_players);
-            });
+        getPlayersByGameId(gameId, (_players) => {
+            setPlayers(_players);
+        });
 
-            addClientToGameRoom(clientId, (response) => {
-                if (response.errorMessage) {
-                    console.log(response.errorMessage);
-                    props.history.push('/');
-                }
-            });
-
-            updateCurrentCard((response) => {
-                if (response.errorMessage) {
-                    console.log(response.errorMessage);
-                    return;
-                }
-                setCardsLeft(response.cardsLeft);
-                setCurrentCard(response.card);
-            })
-
-            updateDiceSide((response) => {
-                if (response.error) {
-                    console.log(response.error);
-                    return;
-                }
+        addClientToGameRoom(clientId, (response) => {
+            if (response.errorMessage) {
+                toast.error(response.errorMessage);
+                props.history.push('/');
+            } if (response.side && response.card) {
                 setCurrentDiceSide(response.side);
-            });
+                setCurrentCard(response.card);
+                setCardsLeft(response.cardsLeft);
+            }
+        });
 
-            updatePlayers((message, _players) => {
-                toast.success(message);
+        updateCurrentCard((response) => {
+            if (response.errorMessage) {
+                console.log(response.errorMessage);
+                return;
+            }
+            setCardsLeft(response.cardsLeft);
+            setCurrentCard(response.card);
+        })
+
+        updateDiceSide((response) => {
+            if (response.error) {
+                console.log(response.error);
+                return;
+            }
+            setCurrentDiceSide(response.side);
+        });
+
+        updatePlayers((message, _players) => {
+            toast.success(message);
+            if (_players) {
                 setPlayers(_players);
-            })
+            }
+        })
 
-            changePlayer((message) => {
-                console.log(message);
-                toast.warn(message);
+        changePlayer((message) => {
+            console.log(message);
+            toast.warn(message);
+            if (tickAudio.current) {
                 tickAudio.current.play();
-            });
+            }
+        });
 
-            gameStarted((message) => {
-                toast.info(message);
-                setRoundStarted(true);
-            });
+        gameStarted((response) => {
 
-            gameEnded((loser) => {
+            setRoundStarted(true);
+            if (response.errorMessage) {
+                toast.error(response.errorMessage);
+            } else if (response.gameMasterMessage) {
+                toast.info(response.gameMasterMessage)
+                if (tickAudio.current) {
+                    tickAudio.current.play();
+                }
+            } else {
+                toast.info(response.message);
+            }
+
+
+            gameEnded((response) => {
                 if (tickAudio.current && !tickAudio.current.paused) {
                     tickAudio.current.pause();
                 }
                 boomAudio.current.play();
-                setRoundLoser(loser);
+                setRoundLoser(response.loser);
+                setPlayers(response.updatedPlayers);
                 setShowLoserModal(true);
                 resetState();
+                removeListener('game-ended');
             })
+        });
 
-        }
-        return () => mounted = false;
-    }, [gameId, clientId])
+        onDisconnect((response) => {
+            props.history.push('/');
+            removeCookie('clientId', { path: '/game' });
+        })
+
+        // }
+        return () => closeSocket();
+    }, [])
 
     function handleCardClick() {
-        if (isCardDrawn) {
-            toast.error('You already drew a card')
-            return;
-        }
         getCurrentCard(clientId, (response) => {
             if (response.errorMessage) {
                 toast.error(response.errorMessage);
             } else {
                 setCurrentCard(response.card);
-                setIsCardDrawn(true);
                 setCardsLeft(response.cardsLeft);
             }
         })
     }
 
     function handleDiceClick() {
-        if (isDiceRolled) {
-            toast.error('You have already rolled the dice')
-            return;
-        }
         getSocketDiceSide(clientId, (response) => {
             if (response.errorMessage) {
                 toast.error(response.errorMessage);
             } else {
-                setIsDiceRolled(true);
                 setCurrentDiceSide(response.side);
             }
         });
@@ -171,8 +176,6 @@ function Game(props) {
 
     function resetState() {
         setRoundStarted(false);
-        setIsCardDrawn(false);
-        setIsDiceRolled(false);
     }
 
     function resetGame() {
@@ -187,9 +190,6 @@ function Game(props) {
         startGame(clientId, (response) => {
             if (response.errorMessage) {
                 toast.error(response.errorMessage);
-            } else {
-                toast.info(response.message)
-                tickAudio.current.play();
             }
         })
 
@@ -217,7 +217,8 @@ function Game(props) {
                     noClose={hideLoserModal}
                     body={
                         <ItemList
-                            items={players
+                            items={[...players]
+                                .sort((player1, player2) => player2.roundsLost - player1.roundsLost)
                                 .map((player) => {
                                     return `${player.name}  ${player.roundsLost}`;
                                 })}
