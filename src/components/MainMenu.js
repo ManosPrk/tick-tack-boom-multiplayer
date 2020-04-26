@@ -1,6 +1,6 @@
 import React from "react";
 import Bomb from "./Bomb";
-import { createGameInstance, addPlayerToGame } from "../socket_helper/playerSocket";
+import { createGameInstance, addPlayerToGame, openSocket, closeSocket } from "../socket_helper/playerSocket";
 import ModalFormTemplate from "./common/ModalFormTemplate";
 import { toast } from "react-toastify";
 import { useCookies } from "react-cookie";
@@ -18,6 +18,12 @@ function MainMenu(props) {
         name: '',
         gameId: ''
     };
+
+    useEffect(() => {
+        openSocket()
+
+        return () => closeSocket();
+    })
 
     function handleNewGameSubmit(event) {
         event.preventDefault();
@@ -43,7 +49,7 @@ function MainMenu(props) {
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage)
             } else {
-                setCookie('clientId', ioResponse.clientId);
+                    setCookie('clientId', ioResponse.clientId);
                 props.history.push(`game/${joinGameInputs.gameId}`);
             }
         });
