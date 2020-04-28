@@ -1,3 +1,5 @@
+/* GENERAL RULES */
+
 html, body, #main, #main-menu-container{
     height: 100%;
     background: #2a2a2a;
@@ -25,6 +27,16 @@ a:hover{
                                     supported by Chrome, Opera and Firefox */
   }
 
+.no-horizontal-padding{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.no-padding{
+    padding: 0 !important;
+}
+
+/* HEADER */
 
 .nav-button{
     text-decoration: none;
@@ -38,6 +50,11 @@ a:hover{
 
 .nav-button:focus{
     text-decoration: none;
+}
+
+.nav-button-header{
+    padding: 0;
+    margin: 0;
 }
 
 .justify-content-evenly{
