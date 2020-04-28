@@ -48,7 +48,7 @@ function MainMenu(props) {
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage)
             } else {
-                if (!ioResponse.rejoinMessage) {
+                if (ioResponse.clientId) {
                     setCookie('clientId', ioResponse.clientId);
                 }
                 props.history.push(`game/${joinGameInputs.gameId}`);
