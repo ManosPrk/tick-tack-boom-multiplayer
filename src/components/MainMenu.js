@@ -7,8 +7,7 @@ import { useCookies } from "react-cookie";
 import { useEffect } from "react";
 
 function MainMenu(props) {
-    // eslint-disable-next-line no-unused-vars
-    const [cookies, setCookie, removeCookie] = useCookies(['player']);
+    const [cookies, setCookie, removeCookies] = useCookies(['player']);
     const newGameInputValues = {
         name: '',
         gameId: ''
@@ -27,13 +26,13 @@ function MainMenu(props) {
 
     function handleNewGameSubmit(event) {
         event.preventDefault();
-        createGameInstance({ ...newGameInputValues, clientId: cookies.clientId }, (ioResponse) => {
-            console.log(ioResponse.errorMessage);
+        createGameInstance({ ...newGameInputValues }, (ioResponse) => {
+            console.log(ioResponse);
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage);
             } else {
-                setCookie('clientId', ioResponse.clientId);
-                props.history.push(`/game/${ioResponse.gameId}`);
+                setCookie("player", newGameInputValues);
+                props.history.push(`/game/${newGameInputValues.gameId}`);
             }
         });
     }
@@ -44,13 +43,12 @@ function MainMenu(props) {
         if (form.checkValidity() === false) {
             return;
         }
-        addPlayerToGame({ ...joinGameInputs, clientId: cookies.clientId }).then((ioResponse) => {
+        addPlayerToGame({ ...joinGameInputs }, (ioResponse) => {
             if (ioResponse.errorMessage) {
                 toast.error(ioResponse.errorMessage)
+                return;
             } else {
-                if (ioResponse.clientId) {
-                    setCookie('clientId', ioResponse.clientId);
-                }
+                setCookie("player", joinGameInputs);
                 props.history.push(`game/${joinGameInputs.gameId}`);
             }
         });

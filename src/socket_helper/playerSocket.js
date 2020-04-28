@@ -5,8 +5,8 @@ export function removeListener(socketName) {
     socket.off(socketName);
 }
 
-export function addClientToGameRoom(clientId, cb) {
-    socket.emit('add-client-to-game-room', clientId, (response) => {
+export function addClientToGameRoom(data, cb) {
+    socket.emit('add-client-to-game-room', data, (response) => {
         cb(response);
     })
 }
@@ -17,16 +17,8 @@ export function createGameInstance(data, cb) {
     });
 }
 
-export function addPlayerToGame(data) {
-    return new Promise((resolve) => {
-        socket.emit('join-game-instance', data, (response) => {
-            resolve(response);
-        });
-    });
-}
-
-export function isInstanceValid(gameId, cb) {
-    socket.emit('is-valid-game', gameId, (response) => {
+export function addPlayerToGame(data, cb) {
+    socket.emit('join-game-instance', data, (response) => {
         cb(response);
     });
 }
@@ -46,8 +38,8 @@ export function getPlayersByGameId(gameId, cb) {
     });
 }
 
-export function getSocketDiceSide(gameId, cb) {
-    socket.emit('request-dice-side', gameId, (data) => {
+export function getSocketDiceSide(cb) {
+    socket.emit('request-dice-side', (data) => {
         cb(data)
     });
 }
@@ -58,8 +50,8 @@ export function updateDiceSide(cb) {
     })
 }
 
-export function getCurrentCard(gameId, cb) {
-    socket.emit('request-card', gameId, (data) => {
+export function getCurrentCard(cb) {
+    socket.emit('request-card', (data) => {
         console.log(data);
         cb(data)
     });
@@ -71,14 +63,14 @@ export function updateCurrentCard(cb) {
     })
 }
 
-export function startGame(yourPlayerId, cb) {
-    socket.emit('start-game', yourPlayerId, (message) => {
+export function startGame(cb) {
+    socket.emit('start-game', (message) => {
         cb(message);
     });
 }
 
-export function passBomb(playerId, cb) {
-    socket.emit('pass-bomb', playerId, (message) => cb(message));
+export function passBomb(cb) {
+    socket.emit('pass-bomb', (message) => cb(message));
 }
 
 export function changePlayer(cb) {
@@ -104,9 +96,9 @@ export function getInstances() {
     });
 }
 
-export function onDisconnect(cb) {
-    socket.on('disconnect', (response) => {
-        cb(response)
+export function onPlayerDisconnect(cb) {
+    socket.on('player-disconnect', (response) => {
+        cb(response);
     });
 }
 

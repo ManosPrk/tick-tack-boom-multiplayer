@@ -5,7 +5,7 @@ import Card from "./Card";
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
-import { closeSocket, getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, isInstanceValid, startGame, addClientToGameRoom, changePlayer, passBomb, gameEnded, gameStarted, removeListener, openSocket, onDisconnect } from '../socket_helper/playerSocket';
+import { closeSocket, getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, startGame, addClientToGameRoom, changePlayer, passBomb, gameEnded, gameStarted, removeListener, openSocket, onPlayerDisconnect } from '../socket_helper/playerSocket';
 import { useEffect } from 'react';
 import { useRef } from 'react';
 import ModalTemplate from './common/ModalTemplate';
@@ -15,12 +15,10 @@ import { Button } from 'react-bootstrap';
 
 function Game(props) {
     const [cardsLeft, setCardsLeft] = useState();
-    //TO-DO
+    const [cookies, setCookie, removeCookies] = useCookies(['player']);
     const gameId = props.match.params.id;
     // eslint-disable-next-line no-unused-vars
-    const [cookies, setCookie, removeCookie] = useCookies(['player']);
     // eslint-disable-next-line no-unused-vars
-    const [clientId, setClientId] = useState(cookies.clientId);
     const [currentCard, setCurrentCard] = useState('DRAW');
     const [currentDiceSide, setCurrentDiceSide] = useState('ROLL');
     const [roundStarted, setRoundStarted] = useState(false);
@@ -42,19 +40,19 @@ function Game(props) {
     useEffect(() => {
         openSocket();
 
-        getPlayersByGameId(gameId, (_players) => {
-            setPlayers(_players);
-        });
-
-        addClientToGameRoom(clientId, (response) => {
+        addClientToGameRoom({ gameId, name: cookies.player.name }, (response) => {
             if (response.errorMessage) {
                 toast.error(response.errorMessage);
                 props.history.push('/');
-            } if (response.side && response.card) {
+            } else if (response.card) {
                 setCurrentDiceSide(response.side);
                 setCurrentCard(response.card);
                 setCardsLeft(response.cardsLeft);
             }
+        });
+
+        getPlayersByGameId(gameId, (_players) => {
+            setPlayers(_players);
         });
 
         updateCurrentCard((response) => {
@@ -90,7 +88,7 @@ function Game(props) {
         });
 
         gameStarted((response) => {
-
+            console.log(response);
             setRoundStarted(true);
             if (response.errorMessage) {
                 toast.error(response.errorMessage);
@@ -117,8 +115,9 @@ function Game(props) {
             })
         });
 
-        onDisconnect((response) => {
-            props.history.push('/');
+        onPlayerDisconnect((response) => {
+            toast.warn(response.message);
+            setPlayers(response.players);
         })
 
         // }
@@ -126,7 +125,7 @@ function Game(props) {
     }, [])
 
     function handleCardClick() {
-        getCurrentCard(clientId, (response) => {
+        getCurrentCard((response) => {
             if (response.errorMessage) {
                 toast.error(response.errorMessage);
             } else {
@@ -137,7 +136,7 @@ function Game(props) {
     }
 
     function handleDiceClick() {
-        getSocketDiceSide(clientId, (response) => {
+        getSocketDiceSide((response) => {
             if (response.errorMessage) {
                 toast.error(response.errorMessage);
             } else {
@@ -152,7 +151,7 @@ function Game(props) {
             startTimer();
         }
         else if (roundStarted) {
-            passBomb(clientId, (response) => {
+            passBomb((response) => {
                 console.log(response)
                 if (response.errorMessage) {
                     toast.error(response.errorMessage);
@@ -189,7 +188,7 @@ function Game(props) {
 
     function startTimer() {
         setRoundStarted(true);
-        startGame(clientId, (response) => {
+        startGame((response) => {
             if (response.errorMessage) {
                 toast.error(response.errorMessage);
             }
