@@ -11,6 +11,7 @@ import { useRef } from 'react';
 import ModalTemplate from './common/ModalTemplate';
 import { useCookies } from 'react-cookie';
 import ItemList from './common/ItemList';
+import { Button } from 'react-bootstrap';
 
 function Game(props) {
     const [cardsLeft, setCardsLeft] = useState();
@@ -34,6 +35,8 @@ function Game(props) {
 
     ///TODO///
     //fix menu changing position on show modals
+    //add leave game button
+    //add standings button
     ///
 
     useEffect(() => {
@@ -116,7 +119,6 @@ function Game(props) {
 
         onDisconnect((response) => {
             props.history.push('/');
-            removeCookie('clientId', { path: '/game' });
         })
 
         // }
@@ -196,7 +198,14 @@ function Game(props) {
     }
 
     return (
-        <div className="game-container">
+        <div className="game-container no-padding">
+            <nav className="d-flex">
+                <Button className="nav-button float-left no-padding" variant="link">
+                    <h3 className="nav-button-header">
+                        Menu
+                    </h3>
+                </Button>
+            </nav>
             {players.length < 2 &&
                 <ModalTemplate
                     show={true}
@@ -208,7 +217,6 @@ function Game(props) {
                         </div>
                     }
                 />}
-            <NavLink to="/">Menu</NavLink>
             {
                 showLoserModal &&
                 <ModalTemplate
@@ -220,7 +228,7 @@ function Game(props) {
                             items={[...players]
                                 .sort((player1, player2) => player2.roundsLost - player1.roundsLost)
                                 .map((player) => {
-                                    return `${player.name}  ${player.roundsLost}`;
+                                    return `${player.name}  has lost ${player.roundsLost} round${player.roundsLost === 1 ? `` : `s`} in total`;
                                 })}
                         />
                     }
