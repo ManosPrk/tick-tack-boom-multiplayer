@@ -103,7 +103,7 @@ export function onPlayerDisconnect(cb) {
 }
 
 export function openSocket() {
-    socket = io.connect("192.168.1.8:1337/");
+    socket = io.connect("localhost:1337/");
 }
 
 export function closeSocket() {
