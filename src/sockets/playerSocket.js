@@ -32,8 +32,8 @@ export function updatePlayers(cb) {
 
 
 
-export function getPlayersByGameId(gameId, cb) {
-    socket.emit('request-players-from-game', gameId, (response) => {
+export function getPlayersByGameId(cb) {
+    socket.emit('request-players-from-game', (response) => {
         cb(response);
     });
 }

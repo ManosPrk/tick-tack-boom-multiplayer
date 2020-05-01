@@ -1,5 +1,5 @@
 import React from 'react';
-import { getInstances, openSocket, closeSocket } from '../socket_helper/playerSocket';
+import { getInstances, openSocket, closeSocket } from '../sockets/playerSocket';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import ItemList from './common/ItemList';
@@ -18,12 +18,11 @@ function InstancesModals(props) {
                 gamesArray = [
                     `id: ${game.id}`,
                     `cards: ${game.cards.length}`,
-                    `playerWithBomb: ${game.playerWithBomb.id}, ${game.playerWithBomb.name}, ${game.playerWithBomb.socketId}`,
+                    `playerWithBomb: ${game.playerWithBomb ? `${game.playerWithBomb.id}, ${game.playerWithBomb.name}` : 'null'}`,
                 ];
-                game.players.forEach((player, index) => gamesArray.push(`Player: ${player.name} id:${player.id}, socket: ${player.socketId} index of array: ${index}`))
+                game.players.forEach((player, index) => gamesArray.push(`Player: ${player.name} isGameMaster: ${player.isGameMaster} id:${player.id}, socket: ${player.socketId} index of array: ${index}`))
             }
             )
-            console.log(gamesArray);
             setGames(gamesArray);
         })
         return () => closeSocket();

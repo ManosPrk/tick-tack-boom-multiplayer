@@ -1,10 +1,9 @@
 import React from "react";
 import Bomb from "./Bomb";
-import { createGameInstance, addPlayerToGame, openSocket, closeSocket } from "../socket_helper/playerSocket";
 import ModalFormTemplate from "./common/ModalFormTemplate";
 import { toast } from "react-toastify";
 import { useCookies } from "react-cookie";
-import { useEffect } from "react";
+import { createGameInstance, joinGameInstance, gameExists } from "../sockets/emit";
 
 function MainMenu(props) {
     const [cookies, setCookie, removeCookies] = useCookies(['player']);
@@ -18,23 +17,18 @@ function MainMenu(props) {
         gameId: ''
     };
 
-    useEffect(() => {
-        openSocket()
-
-        return () => closeSocket();
-    })
 
     function handleNewGameSubmit(event) {
         event.preventDefault();
-        createGameInstance({ ...newGameInputValues }, (ioResponse) => {
-            console.log(ioResponse);
-            if (ioResponse.errorMessage) {
-                toast.error(ioResponse.errorMessage);
+        gameExists(newGameInputValues.gameId, (response) => {
+            if (!response) {
+                createGameInstance(newGameInputValues.gameId, newGameInputValues.name);
+                props.history.push(`game/${newGameInputValues.gameId}`);
             } else {
-                setCookie("player", newGameInputValues);
-                props.history.push(`/game/${newGameInputValues.gameId}`);
+                toast.error("There is already an active game with this id!");
             }
-        });
+        })
+
     }
 
     function handleJoinGameSubmit(event) {
@@ -43,15 +37,8 @@ function MainMenu(props) {
         if (form.checkValidity() === false) {
             return;
         }
-        addPlayerToGame({ ...joinGameInputs }, (ioResponse) => {
-            if (ioResponse.errorMessage) {
-                toast.error(ioResponse.errorMessage)
-                return;
-            } else {
-                setCookie("player", joinGameInputs);
-                props.history.push(`game/${joinGameInputs.gameId}`);
-            }
-        });
+        joinGameInstance(joinGameInputs.gameId, joinGameInputs.name);
+        props.history.push(`game/${joinGameInputs.gameId}`);
     }
 
     return (
