@@ -90,18 +90,31 @@ export const socketEvents = ({ value, setValue }) => {
     })
 
     socket.on('change-player', (response) => {
-        console.log(response);
+        toast.success(response.message);
         setValue(state => { return { ...state, changePlayerMessage: response.message, playTickAudio: true } });
     });
 
     socket.on('player-changed', (response) => {
-        console.log(response);
+        toast.info(response.message);
         if (response.errorMessage) {
             toast.error(response.errorMessage);
         } else {
             setValue(state => { return { ...state, bombPassedMessage: response.message, playTickAudio: false } });
         }
     })
+
+    socket.on('round-started', (response) => {
+        toast.success(response.message);
+        setValue(state => {
+            return {
+                ...state,
+                gameStartedMessage: response.message,
+                roundStarted: response.roundStarted,
+                roundEnded: response.roundEnded,
+                playBoomAudio: false
+            }
+        });
+    });
 
     socket.on('round-ended', (response) => {
         console.log(response);
@@ -111,25 +124,26 @@ export const socketEvents = ({ value, setValue }) => {
                 loser: response.loser,
                 players: response.updatedPlayers,
                 roundStarted: response.roundStarted,
-                gameEnded: response.gameEnded,
+                roundEnded: response.roundEnded,
                 playTickAudio: false,
                 playBoomAudio: true,
             }
         });
     })
 
-    socket.on('round-started', (response) => {
+    socket.on('round-resetted', (response) => {
         setValue(state => {
             return {
                 ...state,
-                gameStartedMessage: response.message,
                 roundStarted: response.roundStarted,
-                playBoomAudio: false
+                roundEnded: response.roundEnded,
+                gameEnded: response.gameEnded,
             }
         });
     });
 
     socket.on('player-disconnect', (response) => {
+        toast.warn(response.message);
         setValue(state => { return { ...state, playerDisconnectMessage: response.message, players: response.players } });
     });
 };
