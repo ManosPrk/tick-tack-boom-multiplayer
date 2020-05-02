@@ -19,6 +19,7 @@ const SocketContext = React.createContext({
     bombPassedMessage: '',
     updateGameDataErrorMessage: '',
     roundStarted: false,
+    roundEnded: false,
     gameEnded: false,
     playTickAudio: false,
     playBoomAudio: false,
