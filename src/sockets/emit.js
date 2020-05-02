@@ -41,6 +41,10 @@ export function startRound() {
     socket.emit('start-round');
 }
 
+export function resetRound(gameId) {
+    socket.emit('reset-round', gameId);
+}
+
 // export const getInstances() {
 //         socket.emit('get-instances', (response) => {
 //             resolve(response);
