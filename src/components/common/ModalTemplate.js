@@ -5,25 +5,27 @@ import PropTypes from 'prop-types';
 
 function ModalTemplate(props) {
 
-    const [show, setShow] = useState(props.show || false);
+    const [show, setShow] = useState(false);
 
-    const handleOpen = () => setShow(props.open || true);
-    const handleClose = () => setShow(props.noClose || false);
+    const handleOpen = () => setShow(true);
+    const handleClose = () => setShow(false);
 
     return (
         <>
-            <Button className="nav-button" variant="link" onClick={handleOpen}>
-                <h1>
-                    {props.modalButtonText}
-                </h1>
-            </Button>
+            {props.modalButtonText &&
+                <Button className="nav-button" variant="link" onClick={handleOpen}>
+                    <h1>
+                        {props.modalButtonText}
+                    </h1>
+                </Button>
+            }
 
             <Modal
-                show={show}
+                show={props.show || show}
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
                 className="game-modal"
-                onHide={handleClose}
+                onHide={props.handleClose || handleClose}
             >
                 <Modal.Header className='game-modal-header justify-content-center'>
                     <Modal.Title>{props.title}</Modal.Title>
@@ -51,7 +53,10 @@ ModalTemplate.propTypes = {
     modalButtonText: PropTypes.string,
     title: PropTypes.string,
     body: PropTypes.node.isRequired,
-    handleClick: PropTypes.func
+    open: PropTypes.bool,
+    close: PropTypes.bool,
+    handleOpen: PropTypes.func,
+    handleClose: PropTypes.func,
 }
 
 export default ModalTemplate;
