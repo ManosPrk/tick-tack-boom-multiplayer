@@ -33,10 +33,6 @@ function MainMenu(props) {
 
     function handleJoinGameSubmit(event) {
         event.preventDefault();
-        const form = event.target;
-        if (form.checkValidity() === false) {
-            return;
-        }
         joinGameInstance(joinGameInputs.gameId, joinGameInputs.name);
         props.history.push(`game/${joinGameInputs.gameId}`);
     }
