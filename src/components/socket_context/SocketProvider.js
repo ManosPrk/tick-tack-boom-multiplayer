@@ -29,8 +29,7 @@ const SocketProvider = (props) => {
     });
 
     useEffect(() => {
-        initSockets({ value, setValue });
-        console.log(value);
+        initSockets({ setValue });
     }, [initSockets]);
     // Note, we are passing setValue ^ to initSockets
     return (

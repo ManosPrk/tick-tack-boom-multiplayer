@@ -2,11 +2,9 @@ import React from "react";
 import Bomb from "./Bomb";
 import ModalFormTemplate from "./common/ModalFormTemplate";
 import { toast } from "react-toastify";
-import { useCookies } from "react-cookie";
 import { createGameInstance, joinGameInstance, gameExists } from "../sockets/emit";
 
 function MainMenu(props) {
-    const [cookies, setCookie, removeCookies] = useCookies(['player']);
     const newGameInputValues = {
         name: '',
         gameId: ''
