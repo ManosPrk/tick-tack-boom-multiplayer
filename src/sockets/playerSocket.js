@@ -103,7 +103,7 @@ export function onPlayerDisconnect(cb) {
 }
 
 export function openSocket() {
-    socket = io.connect("192.168.1.8:1337/");
+    socket = io.connect("https://ttboom-web-api-server.herokuapp.com/");
 }
 
 export function closeSocket() {
