@@ -17,7 +17,7 @@ function App() {
                 <ToastContainer newestOnTop autoClose={2000} hideProgressBar />
                 <Switch>
                     <Route path="/" exact component={MainMenu} />
-                    <Route path="/game/:id" exact component={Game} />
+                    <Route path="/game" exact component={Game} />
                     <Redirect from="/game" to="/" />
                     <Route path="/instances" exact component={InstancesModals} />
                 </Switch>
