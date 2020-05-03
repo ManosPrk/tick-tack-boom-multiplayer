@@ -21,7 +21,7 @@ function MainMenu(props) {
         gameExists(newGameInputValues.gameId, (response) => {
             if (!response) {
                 createGameInstance(newGameInputValues.gameId, newGameInputValues.name);
-                props.history.push(`game/${newGameInputValues.gameId}`);
+                props.history.push(`game`);
             } else {
                 toast.error("There is already an active game with this id!");
             }
@@ -32,7 +32,7 @@ function MainMenu(props) {
     function handleJoinGameSubmit(event) {
         event.preventDefault();
         joinGameInstance(joinGameInputs.gameId, joinGameInputs.name);
-        props.history.push(`game/${joinGameInputs.gameId}`);
+        props.history.push(`game`);
     }
 
     return (
