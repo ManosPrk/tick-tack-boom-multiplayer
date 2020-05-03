@@ -74,6 +74,10 @@ a:hover{
     background: #a0bcbd;
 }
 
+.items-table{
+    background: aliceblue;
+}
+
 .syllable-card{
     display: flex;
     flex-flow: column;
