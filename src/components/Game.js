@@ -5,11 +5,13 @@ import Card from "./Card";
 import { useRef } from 'react';
 import ModalTemplate from './common/ModalTemplate';
 import ItemList from './common/ItemList';
+import ItemsTable from "./common/ItemsTable"
 import { Button } from 'react-bootstrap';
 import SocketContext from './socket_context/SocketContext';
 import { useContext } from 'react';
-import { addClientToGameRoom, passBomb, startRound, isGameValid, resetRound, } from '../sockets/emit';
+import { addClientToGameRoom, passBomb, startRound, isGameValid, resetRound, disconnectPlayer } from '../sockets/emit';
 import { useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 
 function Game(props) {
     isGameValid((response) => {
@@ -34,6 +36,7 @@ function Game(props) {
         playBoomAudio,
         loser,
         roundEnded,
+        gameOver
     } = useContext(SocketContext);
     const tickAudio = useRef();
     const boomAudio = useRef();
@@ -43,6 +46,10 @@ function Game(props) {
             addClientToGameRoom(playerName, gameId);
         }
     }, [gameId])
+
+    useEffect(() => {
+        return () => disconnectPlayer();
+    }, [])
 
     function handleBombClick() {
         if (!roundStarted) {
@@ -60,11 +67,11 @@ function Game(props) {
     return (
         <div className="game-container no-padding">
             <nav className="d-flex">
-                <Button className="nav-button float-left no-padding" variant="link">
+                <NavLink to="/" className="nav-button float-left no-padding" variant="link">
                     <h3 className="nav-button-header">
                         Menu
                     </h3>
-                </Button>
+                </NavLink>
             </nav>
             <ModalTemplate
                 show={players.length < 2 ? true : false}
@@ -78,14 +85,12 @@ function Game(props) {
             <ModalTemplate
                 show={roundEnded}
                 handleClose={handleModalClose}
-                title={`${loser ? loser.name : ''} lost this round!`}
+                title={gameOver ? "Game over!" : `${loser ? loser.name : ''} lost this round!`}
                 body={
-                    <ItemList
+                    <ItemsTable
                         items={[...players]
-                            .sort((player1, player2) => player2.roundsLost - player1.roundsLost)
-                            .map((player) => {
-                                return `${player.name}  has lost ${player.roundsLost} round${player.roundsLost === 1 ? `` : `s`} in total`;
-                            })}
+                            .sort((player1, player2) => player2.roundsLost - player1.roundsLost)}
+                        columns={["#", "Name", "Rounds Lost"]}
                     />
                 }
             />
