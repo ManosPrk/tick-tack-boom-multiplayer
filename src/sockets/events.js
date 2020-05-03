@@ -1,149 +1,79 @@
 import { socket } from './index';
 import { toast } from 'react-toastify';
+import { SocketContextDefaultState } from '../components/socket_context/SocketContextDefaultState';
 
-export const socketEvents = ({ value, setValue }) => {
-    socket.on('notify-players', (response) => {
-        if (response.errorMessage) {
-            toast.error(response.errorMessage);
+export const socketEvents = ({ setValue }) => {
+    const handleSetState = (valuesToSet) => {
+        if (valuesToSet.errorMessage) {
+            toast.error(valuesToSet.errorMessage)
         } else {
-            const { message, players } = response;
-            setValue(state => { return { ...state, notifyPlayersMessage: message, players } });
+            setValue(state => { return { ...state, ...valuesToSet } });
         }
+    }
+    socket.on('notify-players', (response) => {
+        toast.info(response.notifyPlayersMessage);
+        handleSetState(response);
     });
 
     socket.on('update-players', (response) => {
-        console.log(response);
-        if (response.errorMessage) {
-            toast.error(response.errorMessage);
-        } else {
-            setValue(state => { return { ...state, players: response.players } });
-        }
+        handleSetState(response);
     });
 
 
     socket.on('new-game-created', (response) => {
-        console.log(response);
-        if (response.errorMessage) {
-            toast.error(response.errorMessage);
-        } else {
-            setValue(state => {
-                return {
-                    ...state,
-                    createGameMessage: response.successMessage,
-                    gameId: response.gameId,
-                    playerName: response.playerName,
-                    players: response.players
-                }
-            });
-        }
+        handleSetState(response);
     });
 
     socket.on('joined-game', (response) => {
-        if (response.errorMessage) {
-            toast.error(response.errorMessage);
-        } else {
-            setValue(state => {
-                return {
-                    ...state,
-                    createGameMessage: response.successMessage,
-                    gameId: response.gameId,
-                    playerName: response.playerName,
-                    players: response.players
-                }
-            });
-        }
+        handleSetState(response);
     })
 
     socket.on('update-game-data', (response) => {
-        if (response.errorMessage) {
-            toast.error(response.errorMessage);
-        } else {
-            const { side, card, cardsLeft, isDiceRolled, isCardDrawn } = response;
-
-            setValue(state => {
-                return {
-                    ...state,
-                    side,
-                    card,
-                    cardsLeft,
-                    isDiceRolled,
-                    isCardDrawn,
-                }
-            });
-        }
+        handleSetState(response);
     })
 
     socket.on('update-dice-side', (response) => {
-        if (response.errorMessage) {
-            toast.error(response.errorMessage);
-        } else {
-            setValue(state => { return { ...state, side: response.side } });
-        }
+        handleSetState(response);
     })
 
     socket.on('update-card', (response) => {
-        if (response.errorMessage) {
-            toast.error(response.errorMessage);
-        } else {
-            setValue(state => { return { ...state, card: response.card, cardsLeft: response.cardsLeft } });
-        }
+        handleSetState(response);
     })
 
     socket.on('change-player', (response) => {
-        toast.success(response.message);
-        setValue(state => { return { ...state, changePlayerMessage: response.message, playTickAudio: true } });
+        toast.success(response.changePlayerMessage);
+        handleSetState({ ...response, playTickAudio: true });
     });
 
     socket.on('player-changed', (response) => {
-        toast.info(response.message);
-        if (response.errorMessage) {
-            toast.error(response.errorMessage);
-        } else {
-            setValue(state => { return { ...state, bombPassedMessage: response.message, playTickAudio: false } });
-        }
+        toast.info(response.bombPassedMessage);
+        handleSetState({ ...response, playTickAudio: false })
     })
 
     socket.on('round-started', (response) => {
-        toast.success(response.message);
-        setValue(state => {
-            return {
-                ...state,
-                gameStartedMessage: response.message,
-                roundStarted: response.roundStarted,
-                roundEnded: response.roundEnded,
-                playBoomAudio: false
-            }
-        });
+        toast.success(response.gameStartedMessage);
+        handleSetState({ ...response });
     });
 
     socket.on('round-ended', (response) => {
-        console.log(response);
-        setValue(state => {
-            return {
-                ...state,
-                loser: response.loser,
-                players: response.updatedPlayers,
-                roundStarted: response.roundStarted,
-                roundEnded: response.roundEnded,
-                playTickAudio: false,
-                playBoomAudio: true,
-            }
-        });
+        handleSetState({ ...response, playTickAudio: false, playBoomAudio: true })
     })
 
     socket.on('round-resetted', (response) => {
-        setValue(state => {
-            return {
-                ...state,
-                roundStarted: response.roundStarted,
-                roundEnded: response.roundEnded,
-                gameEnded: response.gameEnded,
-            }
-        });
+        console.log(response);
+        handleSetState({ ...response, playTickAudio: false, playBoomAudio: false })
     });
 
-    socket.on('player-disconnect', (response) => {
-        toast.warn(response.message);
-        setValue(state => { return { ...state, playerDisconnectMessage: response.message, players: response.players } });
+    socket.on('player-disconnected', (response) => {
+        toast.warn(response.playerDisconnectedMessage);
+        handleSetState(response)
     });
+
+    socket.on('reset-game-state', () => {
+        handleSetState(SocketContextDefaultState);
+    });
+
+    socket.on('game-master-changed', (response) => {
+        handleSetState(response);
+    })
 };
